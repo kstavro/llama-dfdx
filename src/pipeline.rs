@@ -1,5 +1,6 @@
 use rand::{rngs::StdRng, SeedableRng};
 use rust_tokenizers::tokenizer::{SentencePieceBpeTokenizer, Tokenizer, TruncationStrategy};
+use tiktoken_rs::{r50k_base, CoreBPE};
 
 use dfdx::{
     shapes::{Axis, Const, HasShape},
@@ -24,7 +25,7 @@ pub struct LlamaPipeline<M: modeling::LlamaModel> {
     pub cfg: LlamaConfig,
     pub device: super::modeling::Dev,
     pub llama: super::modeling::LlamaForCausalLM<M>,
-    pub tokenizer: SentencePieceBpeTokenizer,
+    pub tokenizer: CoreBPE, //SentencePieceBpeTokenizer,
     pub bos_token: usize,
     pub eos_token: usize,
     pub rng: StdRng,
@@ -56,15 +57,16 @@ impl<M: modeling::LlamaModel> LlamaPipeline<M> {
         );
 
         let tokenizer =
-            SentencePieceBpeTokenizer::from_file(model + "/tokenizer.model", false).unwrap();
+            // SentencePieceBpeTokenizer::from_file(model + "/tokenizer.model", false).unwrap();
+            r50k_base().unwrap();
 
         Self {
             cfg,
             device,
             llama,
             tokenizer,
-            bos_token: 1,
-            eos_token: 2,
+            bos_token: 50256, //1,
+            eos_token: 50256, //2,
             rng,
         }
     }
@@ -75,15 +77,22 @@ impl<M: modeling::LlamaModel> LlamaPipeline<M> {
     ) -> impl Iterator<Item = String> + '_ {
         let prompt = prompt.into();
 
-        let tokenized_input = self.tokenizer.encode_list(
-            &[prompt.clone()],
-            prompt.len(),
-            &TruncationStrategy::LongestFirst,
-            0,
+        // let tokenized_input = self.tokenizer.encode_list(
+        //     &[prompt.clone()],
+        //     prompt.len(),
+        //     &TruncationStrategy::LongestFirst,
+        //     0,
+        // );
+
+        let tokenized_input = self.tokenizer.encode_with_special_tokens(
+            &prompt,
+            // prompt.len(),
+            // &TruncationStrategy::LongestFirst,
+            // 0,
         );
 
-        let mut tokens: Vec<usize> = tokenized_input[0]
-            .token_ids
+        let mut tokens: Vec<usize> = tokenized_input
+            // .token_ids
             .iter()
             .map(|&x| x as usize)
             .collect();
@@ -122,12 +131,19 @@ impl<M: modeling::LlamaModel> LlamaPipeline<M> {
 
                 tokens.push(new_token);
 
+                // if new_token == self.eos_token {
+                //     None
+                // } else if new_token == 13 {
+                //     Some("\n".into())
+                // } else {
+                //     Some(self.tokenizer.decode(&[new_token as i64], true, false))
+                // }
                 if new_token == self.eos_token {
                     None
-                } else if new_token == 13 {
-                    Some("\n".into())
+                // } else if new_token == 13 {
+                //     Some("\n".into())
                 } else {
-                    Some(self.tokenizer.decode(&[new_token as i64], true, false))
+                    Some(self.tokenizer.decode(vec![new_token]).unwrap())
                 }
             })
             .take_while(Option::is_some)

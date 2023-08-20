@@ -9,7 +9,7 @@ use dfdx::{
     tensor_ops::*,
 };
 
-pub const VOCAB: usize = 32_000;
+pub const VOCAB: usize = 51200; //32_000;
 pub const HEAD_DIM: usize = 128;
 pub const HEAD_DIM_OVER_2: usize = 64;
 
@@ -45,6 +45,15 @@ impl LlamaModel for Llama65b {
     type Intermediate = Const<22016>;
     type NumHeads = Const<64>;
     const NUM_LAYERS: usize = 80;
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Xgen7b;
+impl LlamaModel for Xgen7b {
+    type Hidden = Const<4096>;
+    type Intermediate = Const<11008>;
+    type NumHeads = Const<32>;
+    const NUM_LAYERS: usize = 32;
 }
 
 pub use half::f16;

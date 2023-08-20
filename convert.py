@@ -1,6 +1,7 @@
 import argparse
 import os
 import torch
+import numpy as np
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
             print("Saving", key, tensor.shape, tensor.dtype)
             path = os.path.sep.join(key.split("."))
             os.makedirs(os.path.join(args.src, os.path.dirname(path)), exist_ok=True)
-            np_array = tensor.numpy()
+            np_array = tensor.numpy().astype(np.float16)
             with open(os.path.join(args.src, path), "w") as fp:
                 np_array.tofile(fp)
             del np_array

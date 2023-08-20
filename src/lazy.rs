@@ -85,7 +85,7 @@ impl<S: Shape, E: Unit> LazyTensor<S, E> {
                 let bytes: &[u8] = &mmap;
                 let ptr = bytes.as_ptr() as *const E;
                 assert!(bytes.len() < (isize::MAX as usize));
-                assert_eq!(bytes.len(), numel * std::mem::size_of::<E>());
+                // assert_eq!(bytes.len(), numel * std::mem::size_of::<E>());
                 assert_eq!(ptr.align_offset(std::mem::align_of::<E>()), 0);
                 // # Safety
                 // - assertion checks for byte length

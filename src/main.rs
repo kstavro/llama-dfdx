@@ -14,6 +14,7 @@ enum Structure {
     Llama7b,
     Llama13b,
     Llama65b,
+    Xgen7b,
 }
 
 impl std::fmt::Display for Structure {
@@ -23,6 +24,7 @@ impl std::fmt::Display for Structure {
             Self::Llama7b => f.write_str("llama-7b"),
             Self::Llama13b => f.write_str("llama-13b"),
             Self::Llama65b => f.write_str("llama-65b"),
+            Self::Xgen7b => f.write_str("xgen-7b"),
         }
     }
 }
@@ -125,6 +127,9 @@ fn main() {
             } else if num_bins == 81 {
                 println!("Detected model folder as LLaMa 65b.");
                 run::<modeling::Llama65b>(args);
+            } else if num_bins == 3 {
+                println!("Detected model folder as Xgen 7b.");
+                run::<modeling::Xgen7b>(args);
             } else {
                 panic!(
                     "Found {num_bins} .bin files in the model directory. Expected 33, 41, or 81."
@@ -134,6 +139,7 @@ fn main() {
         Structure::Llama7b => run::<modeling::Llama7b>(args),
         Structure::Llama13b => run::<modeling::Llama13b>(args),
         Structure::Llama65b => run::<modeling::Llama65b>(args),
+        Structure::Xgen7b => run::<modeling::Xgen7b>(args),
     }
 }
 
